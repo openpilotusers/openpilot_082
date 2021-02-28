@@ -260,7 +260,8 @@ class Planner():
         if self.params.get("OpkrSafetyCamera", encoding="utf8") == "1":
           os.system("echo -n 0 > /data/params/d/OpkrSafetyCamera &")
 
-    self.model_speed = 255 - self.SC.calc_va(sm, v_ego)
+    #self.model_speed = 255 - self.SC.calc_va(sm, v_ego)
+    self.model_speed = interp(abs(sm['controlsState'].curvature), [0.0005, 0.015], [255, 30])
     self.curv_speed = interp(abs(self.model_speed), [30, 60, 90, 91], [30, 50, 70, 255])
     self.curv_speed = self.curv_speed*CV.KPH_TO_MS if v_ego > 8 else 255
     self.lat_mode = int(self.params.get("OpkrLatMode", encoding='utf8'))
