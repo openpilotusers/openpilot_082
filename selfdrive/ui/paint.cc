@@ -507,7 +507,7 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
     color = COLOR_OCHRE_ALPHA(200);
   } else if (s->scene.limitSpeedCamera > 29 && !s->is_speed_over_limit) {
     color = nvgRGBA(0, 120, 0, 200);
-  } else if (s->scene.cruiseAccStatus) {
+  } else if (s->scene.cruiseAccStatus && s->scene.controls_state.getEnabled()) {
     color = nvgRGBA(0, 100, 200, 200);
   } else if (s->scene.controls_state.getEnabled()) {
     color = COLOR_WHITE_ALPHA(75);

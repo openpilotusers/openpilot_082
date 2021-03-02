@@ -286,7 +286,7 @@ class CarState(CarStateBase):
     self.scc11init = copy.copy(cp.vl["SCC11"])
     self.scc12init = copy.copy(cp.vl["SCC12"])
     self.fca11init = copy.copy(cp.vl["FCA11"])
-    ret.cruiseAccStatus = cp_scc.vl["SCC12"]['ACCMode'] == 1
+    ret.cruiseAccStatus = False if self.mainsw_check == 1 or self.brake_check == 1 else True
 
     return ret
 
