@@ -76,6 +76,7 @@ class LongControl():
     self.op_params = opParams()
     self.enable_dg = self.op_params.get('dynamic_gas')
     self.dynamic_gas = DynamicGas(CP, candidate)
+    self.stopped = False
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
@@ -101,7 +102,7 @@ class LongControl():
       dRel = radarState.leadOne.dRel
       vRel = radarState.leadOne.vRel
     if hasLead:
-      stop = True if (dRel < 4.0 and radarState.leadOne.status) else False
+      stop = True if (dRel < 4.5 and radarState.leadOne.status) else False
     else:
       stop = False
     self.long_control_state = long_control_state_trans(active, self.long_control_state, CS.vEgo,
@@ -123,12 +124,18 @@ class LongControl():
       vfactor = 1
       dfactor = 1
       dvfactor = 1
-      gasadd = 1
+      #gasadd = 1
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
+      
+      # added by opkr to control different tune when vehicle start from stop
+      if a_target_raw > 0 and 20 > dRel >= 4.5 and (CS.vEgo*3.6) < 30 and self.stopped:
+        self.pid = LongPIDController(([0., 4., 35.], [2., 2., 1.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
+      elif vRel*3.6 < 5 and dRel >= 8 and self.stopped:
+        self.stopped = False
 
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
 
@@ -137,15 +144,15 @@ class LongControl():
       vfactor = interp(dRel,[1,30,50], [15,7,4])
       dfactor = interp(dRel,[4,10], [1.6,1])
       dvfactor = interp(((CS.vEgo*3.6)/(max(3,dRel))),[1,2,3], [1,3,5])
-      gasadd = interp((vRel*3.6),[1,10], [1,2.3])
+      #gasadd = interp((vRel*3.6),[1,10], [1,2.3])
 
-      if abs(output_gb) < abs(a_target_raw)/afactor and a_target_raw < 0 and dRel > 4:
+      if abs(output_gb) < abs(a_target_raw)/afactor and a_target_raw < 0 and dRel >= 4.5:
         output_gb = (-abs(a_target_raw)/afactor)*dfactor
-      elif output_gb > 0 and a_target_raw < 0 and dRel > 4:
+      elif output_gb > 0 and a_target_raw < 0 and dRel >= 4.5:
         output_gb = output_gb/vfactor
-      elif output_gb > 0 and a_target_raw > 0 and 22 > dRel > 4 and (CS.vEgo*3.6) < 30:
-        output_gb = output_gb*gasadd
-      elif output_gb > 0 and a_target_raw > 0 and dRel > 4 and (CS.vEgo*3.6) < 65:
+      #elif output_gb > 0 and a_target_raw > 0 and 22 > dRel >= 4.5 and (CS.vEgo*3.6) < 30:
+      #  output_gb = output_gb*gasadd
+      elif output_gb > 0 and a_target_raw > 0 and dRel >= 4.5 and (CS.vEgo*3.6) < 65:
         output_gb = output_gb/dvfactor
 
       if prevent_overshoot or CS.brakeHold:
@@ -156,20 +163,21 @@ class LongControl():
       # Keep applying brakes until the car is stopped
       factor = 1
       if hasLead:
-        factor = interp(dRel,[2.0,3.0,4.0,5.0,6.0,7.0,8.0], [6,3.5,1.5,0.7,0.5,0.3,0.0])
+        factor = interp(dRel,[2.0,4.5,5.0,6.0,7.0,8.0], [5,1,0.7,0.5,0.3,0.0])
       if not CS.standstill or output_gb > -BRAKE_STOPPING_TARGET:
         output_gb -= CP.stoppingBrakeRate / RATE * factor
       elif CS.cruiseState.standstill and output_gb < -BRAKE_STOPPING_TARGET:
         output_gb += CP.stoppingBrakeRate / RATE
       output_gb = clip(output_gb, -brake_max, gas_max)
 
+      self.stopped = True
       self.reset(CS.vEgo)
 
     # Intention is to move again, release brake fast before handing control to PID
     elif self.long_control_state == LongCtrlState.starting:
       factor = 1
       if hasLead:
-        factor = interp(dRel,[0.0,2.0,3.0,4.0,5.0], [0.0,0.5,0.75,1.0,1500.0])
+        factor = interp(dRel,[0.0,2.0,3.0,4.5,5.0], [0.0,0.5,0.75,1.0,1500.0])
       if output_gb < -0.2:
         output_gb += CP.startingBrakeRate / RATE * factor
       self.reset(CS.vEgo)
