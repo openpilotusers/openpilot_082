@@ -68,6 +68,12 @@ def unblock_stdout():
 if __name__ == "__main__":
   unblock_stdout()
 
+if not (os.system("cat /data/params/d/CommunityFeaturesToggle | grep '0' ") == 0):
+  if not (os.system("cat -n /data/openpilot/panda/board/safety/safety_hyundai_community.h | grep '    12' | awk '{print $5}' | awk -F';' '{print $1}' | grep 'false' ") == 0):
+    os.system("cp -f /data/openpilot/panda/board/safety/safety_hyundai_community_non_mdps.h /data/openpilot/panda/board/safety/safety_hyundai_community.h")
+elif not (os.system("cat /data/params/d/CommunityFeaturesToggle | grep '1' ") == 0):
+  if not (os.system("cat -n /data/openpilot/panda/board/safety/safety_hyundai_community.h | grep '    12' | awk '{print $5}' | awk -F';' '{print $1}' | grep 'true' ") == 0):
+    os.system("cp -f /data/openpilot/panda/board/safety/safety_hyundai_community_mdps.h /data/openpilot/panda/board/safety/safety_hyundai_community.h")
 
 # Start spinner
 spinner = Spinner()
@@ -584,19 +590,19 @@ def main():
     ("LqrKi", "10"),
     ("DcGain", "30"),
     ("IgnoreZone", "1"),
-    ("PidKp", "25"),
+    ("PidKp", "30"),
     ("PidKi", "50"),
     ("PidKd", "150"),
     ("PidKf", "5"),
     ("CameraOffsetAdj", "60"),
-    ("SteerRatioAdj", "140"),
-    ("SteerRatioMaxAdj", "170"),
+    ("SteerRatioAdj", "150"),
+    ("SteerRatioMaxAdj", "180"),
     ("SteerActuatorDelayAdj", "0"),
     ("SteerRateCostAdj", "45"),
     ("SteerLimitTimerAdj", "40"),
     ("TireStiffnessFactorAdj", "85"),
-    ("SteerMaxAdj", "385"),
-    ("SteerMaxBaseAdj", "275"),
+    ("SteerMaxAdj", "450"),
+    ("SteerMaxBaseAdj", "280"),
     ("SteerDeltaUpAdj", "3"),
     ("SteerDeltaDownAdj", "7"),
     ("SteerMaxvAdj", "10"),
@@ -630,6 +636,7 @@ def main():
     ("OpkrTurnSteeringDisable", "0"),
     ("CarModel", ""),
     ("OpkrSafetyCamera", "0"),
+    ("OpkrHotspotOnBoot", "0"),
   ]
 
   # set unset params

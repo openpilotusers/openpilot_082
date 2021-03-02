@@ -182,7 +182,7 @@ class CarController():
     #self.model_speed = 255 - self.SC.calc_va(sm, CS.out.vEgo)
     lateral_plan = sm['lateralPlan']
     self.outScale = lateral_plan.outputScale
-    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0005, 0.015], [255, 30])
+    self.model_speed = interp(abs(lateral_plan.vCurvature), [0.0002, 0.01], [255, 30])
 
     if CS.out.vEgo > 8:
       if self.variable_steer_max:
@@ -308,7 +308,7 @@ class CarController():
 
     trace1.printf1('{}  {}'.format(str_log1, self.str_log2))
 
-    if CS.lead_distance < (CS.out.vEgo * CV.MS_TO_KPH)/1.5 and (CS.vrelative*3.6) < -20:
+    if CS.lead_distance < (CS.out.vEgo * CV.MS_TO_KPH)/1.5 < 100 and (CS.vrelative*3.6) < -20 and abs(lateral_plan.steerAngleDesireDeg) < 15:
       self.need_brake_timer += 1
       if self.need_brake_timer > 50:
         self.need_brake = True
