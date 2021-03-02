@@ -282,21 +282,21 @@ class Planner():
         accel_limits_turns[1] = min(accel_limits_turns[1], AWARENESS_DECEL)
         accel_limits_turns[0] = min(accel_limits_turns[0], accel_limits_turns[1])
 
-      current_speed = v_ego*CV.MS_TO_KPH
-      current_vRel = lead_1.vRel*CV.MS_TO_KPH
-      current_dRel = lead_1.dRel
-      variable_set_speed = 0
-      if current_vRel < 0 and current_dRel <= 10 and current_speed > 2:
-        variable_set_speed = max(current_speed-1, 2)
-      elif current_vRel < 0 and current_dRel > 10 and current_speed > 2:
-        variable_set_speed = max(current_speed+1, 2)
-      elif current_vRel > 0 and current_dRel <= 10 and current_speed > 2:
-        variable_set_speed = max(current_speed+1, 2)
-      elif current_vRel > 0 and current_dRel > 10 and current_speed > 2:
-        variable_set_speed = max(current_speed+5, 2)
-      else:
-        variable_set_speed = max(current_speed+3, 5)
-      variable_set_speed = variable_set_speed*CV.KPH_TO_MS if variable_set_speed > 0 else v_cruise_setpoint
+      # current_speed = v_ego*CV.MS_TO_KPH
+      # current_vRel = lead_1.vRel*CV.MS_TO_KPH
+      # current_dRel = lead_1.dRel
+      # variable_set_speed = 0
+      # if current_vRel < 0 and current_dRel <= 10 and current_speed > 2:
+      #   variable_set_speed = max(current_speed-1, 2)
+      # elif current_vRel < 0 and current_dRel > 10 and current_speed > 2:
+      #   variable_set_speed = max(current_speed+1, 2)
+      # elif current_vRel > 0 and current_dRel <= 10 and current_speed > 2:
+      #   variable_set_speed = max(current_speed+1, 2)
+      # elif current_vRel > 0 and current_dRel > 10 and current_speed > 2:
+      #   variable_set_speed = max(current_speed+5, 2)
+      # else:
+      #   variable_set_speed = max(current_speed+3, 5)
+      # variable_set_speed = variable_set_speed*CV.KPH_TO_MS if variable_set_speed > 0 else v_cruise_setpoint
 
       cam_distance_calc = 0
       cam_distance_calc = interp(v_ego*CV.MS_TO_KPH, [30,60,100,160], [3.75,5.5,6,7])
@@ -309,8 +309,8 @@ class Planner():
         self.target_speed_map_sign = True
       elif self.lat_mode == 1:
         v_cruise_setpoint = min([v_cruise_setpoint, self.curv_speed])
-      else:
-        v_cruise_setpoint = min([v_cruise_setpoint, variable_set_speed])
+      # else:
+      #   v_cruise_setpoint = min([v_cruise_setpoint, variable_set_speed])
       self.vcruise_setpoint = v_cruise_setpoint
 
       self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
