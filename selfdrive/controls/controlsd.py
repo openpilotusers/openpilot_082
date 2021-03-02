@@ -306,6 +306,7 @@ class Controls:
       else:
         self.AM.SA_add(df_alert, extra_text_1=df_out.user_profile_text, extra_text_2='동적차간거리조절: {} 프로파일 활성화됨'.format(df_out.user_profile_text))
         return
+
   def data_sample(self):
     """Receive data from sockets and update carState"""
 
