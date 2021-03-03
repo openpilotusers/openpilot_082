@@ -518,8 +518,10 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
   if (s->scene.limitSpeedCamera > 29) {
     ui_draw_text(s, rect.centerX(), int(s->viz_rect.y + (bdr_s))+65, "제한속도", 26 * 2.2, COLOR_WHITE_ALPHA(s->scene.cruiseAccStatus ? 200 : 100), "sans-regular");
+    cruise_speed = s->scene.limitSpeedCamera
   } else {
     ui_draw_text(s, rect.centerX(), int(s->viz_rect.y + (bdr_s))+65, "크루즈", 26 * 2.2, COLOR_WHITE_ALPHA(s->scene.cruiseAccStatus ? 200 : 100), "sans-regular");
+    cruise_speed = s->scene.v_cruise_set_point
   }
   const std::string cruise_speed_str = std::to_string((int)std::nearbyint(cruise_speed));
   if (s->scene.controls_state.getEnabled()) {
