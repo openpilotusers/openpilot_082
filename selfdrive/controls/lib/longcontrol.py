@@ -69,6 +69,9 @@ class LongControl():
                                  rate=RATE,
                                  sat_limit=0.8,
                                  convert=compute_gb)
+    
+    self.pid2 = LongPIDController(([0., 4., 35.], [2., 2., 1.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
+
     self.v_pid = 0.0
     self.last_output_gb = 0.0
     self.long_stat = ""
@@ -81,6 +84,7 @@ class LongControl():
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
+    self.pid2.reset()
     self.v_pid = v_pid
 
   def update(self, active, CS, v_target, v_target_future, a_target_raw, a_target, CP, hasLead, radarState, longitudinalPlanSource, extras):
@@ -113,6 +117,7 @@ class LongControl():
     if self.long_control_state == LongCtrlState.off or (CS.brakePressed or CS.gasPressed):
       self.v_pid = v_ego_pid
       self.pid.reset()
+      self.pid2.reset()
       output_gb = 0.
 
     # tracking objects and driving
@@ -120,6 +125,8 @@ class LongControl():
       self.v_pid = v_target
       self.pid.pos_limit = gas_max
       self.pid.neg_limit = - brake_max
+      self.pid2.pos_limit = gas_max
+      self.pid2.neg_limit = - brake_max
       afactor = 1
       vfactor = 1
       dfactor = 1
@@ -132,12 +139,12 @@ class LongControl():
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
       
       # added by opkr to control different tune when vehicle start from stop
+      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
+
       if a_target_raw > 0 and 20 > dRel >= 4.5 and (CS.vEgo*3.6) < 30 and self.stopped:
-        self.pid = LongPIDController(([0., 4., 35.], [2., 2., 1.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
+        output_gb = self.pid2.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
       elif vRel*3.6 < 5 and dRel >= 8 and self.stopped:
         self.stopped = False
-
-      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
 
       # added by opkr
       afactor = interp(CS.vEgo,[0,4,8,12,16,20], [4.2,3.1,2.3,2.1,2,2])
