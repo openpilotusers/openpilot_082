@@ -70,7 +70,7 @@ class LongControl():
                                  sat_limit=0.8,
                                  convert=compute_gb)
     
-    self.pid2 = LongPIDController(([0., 4., 35.], [2.5., 2.5., 2.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
+    self.pid2 = LongPIDController(([0., 4., 35.], [2.5, 2.5, 2.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
 
     self.v_pid = 0.0
     self.last_output_gb = 0.0
