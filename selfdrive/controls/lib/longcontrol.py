@@ -70,7 +70,7 @@ class LongControl():
                                  sat_limit=0.8,
                                  convert=compute_gb)
     
-    self.pid2 = LongPIDController(([0., 4., 35.], [2., 2., 1.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
+    self.pid2 = LongPIDController(([0., 4., 35.], [2.5., 2.5., 2.0]), ([0., 4., 35.], [0.5, 0.5, 0.25]), ([0., 16., 35.], [0.5, 1.7, 1.5]), rate=RATE, sat_limit=0.8, convert=compute_gb)
 
     self.v_pid = 0.0
     self.last_output_gb = 0.0
@@ -106,7 +106,7 @@ class LongControl():
       dRel = radarState.leadOne.dRel
       vRel = radarState.leadOne.vRel
     if hasLead:
-      stop = True if (dRel < 4.5 and radarState.leadOne.status) else False
+      stop = True if (dRel < 4.2 and radarState.leadOne.status) else False
     else:
       stop = False
     self.long_control_state = long_control_state_trans(active, self.long_control_state, CS.vEgo,
@@ -141,7 +141,7 @@ class LongControl():
       # added by opkr to control different tune when vehicle start from stop
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
 
-      if a_target_raw > 0 and 20 > dRel >= 4.5 and (CS.vEgo*3.6) < 30 and self.stopped:
+      if a_target_raw > 0 and 20 > dRel >= 4.2 and (CS.vEgo*3.6) < 30 and self.stopped:
         output_gb = self.pid2.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
       elif vRel*3.6 < 5 and dRel >= 8 and self.stopped:
         self.stopped = False
@@ -153,13 +153,13 @@ class LongControl():
       dvfactor = interp(((CS.vEgo*3.6)/(max(3,dRel))),[1,2,3], [1,3,5])
       #gasadd = interp((vRel*3.6),[1,10], [1,2.3])
 
-      if abs(output_gb) < abs(a_target_raw)/afactor and a_target_raw < 0 and dRel >= 4.5:
+      if abs(output_gb) < abs(a_target_raw)/afactor and a_target_raw < 0 and dRel >= 4.2:
         output_gb = (-abs(a_target_raw)/afactor)*dfactor
-      elif output_gb > 0 and a_target_raw < 0 and dRel >= 4.5:
+      elif output_gb > 0 and a_target_raw < 0 and dRel >= 4.2:
         output_gb = output_gb/vfactor
-      #elif output_gb > 0 and a_target_raw > 0 and 22 > dRel >= 4.5 and (CS.vEgo*3.6) < 30:
+      #elif output_gb > 0 and a_target_raw > 0 and 22 > dRel >= 4.2 and (CS.vEgo*3.6) < 30:
       #  output_gb = output_gb*gasadd
-      elif output_gb > 0 and a_target_raw > 0 and dRel >= 4.5 and (CS.vEgo*3.6) < 65:
+      elif output_gb > 0 and a_target_raw > 0 and dRel >= 4.2 and (CS.vEgo*3.6) < 65:
         output_gb = output_gb/dvfactor
 
       if prevent_overshoot or CS.brakeHold:
@@ -170,7 +170,7 @@ class LongControl():
       # Keep applying brakes until the car is stopped
       factor = 1
       if hasLead:
-        factor = interp(dRel,[2.0,4.5,5.0,6.0,7.0,8.0], [5,1,0.7,0.5,0.3,0.0])
+        factor = interp(dRel,[2.0,4.2,5.0,6.0,7.0,8.0], [3,1,0.7,0.5,0.3,0.0])
       if not CS.standstill or output_gb > -BRAKE_STOPPING_TARGET:
         output_gb -= CP.stoppingBrakeRate / RATE * factor
       elif CS.cruiseState.standstill and output_gb < -BRAKE_STOPPING_TARGET:
@@ -184,7 +184,7 @@ class LongControl():
     elif self.long_control_state == LongCtrlState.starting:
       factor = 1
       if hasLead:
-        factor = interp(dRel,[0.0,2.0,3.0,4.5,5.0], [0.0,0.5,0.75,1.0,1500.0])
+        factor = interp(dRel,[0.0,2.0,3.0,4.2,5.0], [0.0,0.5,1,500.0,1500.0])
       if output_gb < -0.2:
         output_gb += CP.startingBrakeRate / RATE * factor
       self.reset(CS.vEgo)
