@@ -616,7 +616,6 @@ def main():
     ("OpkrBlindSpotDetect", "1"),
     ("OpkrMaxAngleLimit", "90"),
     ("OpkrAutoResumeOption", "1"),
-    ("OpkrAngleOffsetSelect", "0"),
     ("OpkrSpeedLimitOffset", "0"),
     ("LimitSetSpeedCamera", "0"),
     ("LimitSetSpeedCameraDist", "0"),

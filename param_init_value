@@ -52,7 +52,6 @@ DebugUi2:0
 OpkrBlindSpotDetect:1
 OpkrMaxAngleLimit:90
 OpkrAutoResumeOption:1
-OpkrAngleOffsetSelect:0
 OpkrSpeedLimitOffset:0
 OpkrLiveSteerRatio:1
 OpkrVariableSteerMax:1

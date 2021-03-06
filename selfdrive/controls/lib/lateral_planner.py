@@ -95,8 +95,6 @@ class LateralPlanner():
     #self.steer_actuator_delay_vel = [3, 13]
     #self.new_steer_actuator_delay = CP.steerActuatorDelay
 
-    self.angle_offset_select = int(Params().get('OpkrAngleOffsetSelect'))
-
     self.standstill_elapsed_time = 0.0
     self.output_scale = 0.0
     self.v_cruise_kph = 0
@@ -330,10 +328,7 @@ class LateralPlanner():
 
     plan_send.lateralPlan.steeringAngleDeg = float(self.desired_steering_wheel_angle_deg)
     plan_send.lateralPlan.steeringRateDeg = float(self.desired_steering_wheel_angle_rate_deg)
-    if self.angle_offset_select == 0:
-      plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetAverageDeg)
-    else:
-      plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetDeg)
+    plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetAverageDeg)
     plan_send.lateralPlan.mpcSolutionValid = bool(plan_solution_valid)
 
     plan_send.lateralPlan.desire = self.desire
