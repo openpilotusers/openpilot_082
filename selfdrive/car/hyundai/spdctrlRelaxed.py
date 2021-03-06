@@ -225,6 +225,9 @@ class SpdctrlRelaxed(SpdController):
             self.cut_in = False
             self.seq_step_debug = "일반감속,-1"
             lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 40, -1)
+        elif self.map_decel_only and self.cruise_set_speed_kph > int(round(CS.VSetDis)) and ((int(round(self.target_speed)) > int(CS.VSetDis) and self.target_speed != 0) or self.target_speed == 0):
+            self.seq_step_debug = "속도원복"
+            lead_wait_cmd, lead_set_speed = self.get_tm_speed( CS, 10, 1)
         else:
             self.cut_in = False
             self.seq_step_debug = "속도유지"
