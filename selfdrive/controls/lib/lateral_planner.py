@@ -296,7 +296,7 @@ class LateralPlanner():
     self.desired_steering_wheel_angle_rate_deg = -float(math.degrees(desired_curvature_rate * VM.sR)/curvature_factor)
 
     # Atom's steer angle limitation
-    if v_ego < 9 and int(Params().get('UserOption3')) == 1: # 32.4km/h, not clu_Vanz
+    if v_ego < 9 and int(Params().get('UserOption3')) == 1: # 32.4km/h
       xp = [4,9]  # 14.4km/h ~ 32.4km/h
       fp2 = [1,3]  # 1도 ~ 3도
       limit_steers = interp(v_ego, xp, fp2)
